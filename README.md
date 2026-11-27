@@ -36,3 +36,4 @@ HTML, CSS, dan JavaScript murni. Font Bricolage Grotesque dari Google Fonts.
 
 ## Catatan
 Data hanya tersimpan di browser yang dipakai dan tidak tersinkron antar perangkat. Menghapus data browser akan menghapus kartu.
+Animasi search dibantu Claude.
