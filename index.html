@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shortcut</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e3e6ff; --dot:#b4b9f4; --ink:#151220; --paper:#ffffff;
+  --edge:#151220; --shadow:#151220; --cardfg:#151220; --muted:#4a4668;
+  --xbg:#151220; --xfg:#ffffff;
+  --font:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#14121f; --dot:#2a2742; --ink:#f3f0ff; --paper:#201d32;
+    --edge:#f3f0ff; --shadow:#f3f0ff; --muted:#a9a3c7;
+    --xbg:#f3f0ff; --xfg:#151220;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:var(--font); color:var(--ink); background-color:var(--bg);
+  background-image:radial-gradient(var(--dot) 1.6px, transparent 1.6px);
+  background-size:24px 24px;
+  min-height:100vh;
+  padding:max(24px,env(safe-area-inset-top)) 20px max(40px,env(safe-area-inset-bottom));
+}
+main{max-width:760px;margin:0 auto}
+button{font:inherit;color:inherit;cursor:pointer}
+
+header{margin:10px 0 0}
+h1{
+  margin:0;font-weight:800;line-height:.92;letter-spacing:-.035em;
+  font-size:clamp(2.6rem,11vw,4.8rem);overflow-wrap:anywhere;
+}
+.date{margin:12px 2px 0;color:var(--muted);font-weight:500}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 0}
+.pill{
+  background:var(--paper);border:3px solid var(--edge);border-radius:999px;
+  padding:9px 18px;font-weight:800;box-shadow:3px 3px 0 var(--shadow);
+}
+.pill:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--shadow)}
+#editBtn[aria-pressed="true"]{background:#7a5cff;color:#fff}
+#delBtn[aria-pressed="true"]{background:#ff3b5c;color:#fff}
+.hint{min-height:1.5em;margin:16px 2px 20px;color:var(--muted);font-weight:500}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:22px 20px}
+.item{position:relative;--r:0deg}
+.item:nth-child(3n+1){--r:-1.4deg}
+.item:nth-child(3n+2){--r:1.1deg}
+.item:nth-child(3n){--r:-.5deg}
+
+.card{
+  display:flex;flex-direction:column;justify-content:space-between;
+  aspect-ratio:1/1.08;padding:16px 16px 14px;
+  border:3px solid var(--edge);border-radius:24px;
+  box-shadow:6px 6px 0 var(--shadow);
+  text-decoration:none;color:var(--cardfg);
+  transform:rotate(var(--r));
+  transition:transform .14s ease, box-shadow .14s ease;
+}
+.card:hover{transform:rotate(0deg) translate(-2px,-2px);box-shadow:9px 9px 0 var(--shadow)}
+.card:active{transform:rotate(0deg) translate(4px,4px);box-shadow:2px 2px 0 var(--shadow)}
+.card[data-brand="x"]{background:var(--xbg);color:var(--xfg)}
+.big{
+  font-weight:800;line-height:.78;letter-spacing:-.06em;
+  font-size:clamp(4.2rem,15vw,5.8rem);margin-left:-3px;
+}
+.name{font-weight:800;font-size:1.2rem;line-height:1.05;overflow-wrap:anywhere}
+.host{font-weight:500;font-size:.82rem;opacity:.75;margin-top:3px;overflow-wrap:anywhere}
+.mode-edit .card{outline:3px dashed var(--edge);outline-offset:5px}
+
+.del{
+  display:none;position:absolute;top:-12px;right:-10px;z-index:2;
+  width:38px;height:38px;border-radius:50%;
+  background:#ff3b5c;color:#fff;border:3px solid var(--edge);
+  font-size:1.3rem;font-weight:800;line-height:1;
+}
+.mode-del .del{display:block}
+.mode-del .card{pointer-events:none;opacity:.78}
+.empty{grid-column:1/-1;color:var(--muted);font-weight:500;padding:20px 0}
+
+form.add-form{
+  margin-top:44px;display:grid;grid-template-columns:1fr 1.6fr auto;gap:10px;
+  background:var(--paper);border:3px solid var(--edge);border-radius:24px;
+  padding:14px;box-shadow:6px 6px 0 var(--shadow);
+}
+input[type=text]{
+  font:inherit;font-weight:500;color:var(--ink);background:transparent;
+  border:2px solid var(--edge);border-radius:14px;padding:12px 14px;min-width:0;width:100%;
+}
+input::placeholder{color:var(--muted)}
+.primary{background:var(--ink);color:var(--bg);border:0;border-radius:14px;padding:12px 22px;font-weight:800}
+.primary:active{transform:scale(.97)}
+:focus-visible{outline:4px solid #7a5cff;outline-offset:3px}
+#msg{min-height:1.5em;margin:14px 4px 0;color:#ff3b5c;font-weight:700;font-size:.92rem}
+
+dialog{
+  border:3px solid var(--edge);border-radius:24px;background:var(--paper);color:var(--ink);
+  box-shadow:6px 6px 0 var(--shadow);padding:22px;width:min(92vw,430px);font-family:var(--font);
+}
+dialog::backdrop{background:rgba(21,18,32,.6)}
+dialog h2{margin:0 0 16px;font-size:1.4rem;font-weight:800;letter-spacing:-.02em}
+.field{display:grid;gap:6px;margin-bottom:14px}
+.field label{font-weight:800;font-size:.9rem}
+.row2{display:grid;grid-template-columns:92px 1fr;gap:10px}
+.swatches{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sw{width:34px;height:34px;border-radius:50%;border:3px solid var(--edge);padding:0}
+.sw[aria-pressed="true"]{outline:4px solid #7a5cff;outline-offset:2px}
+.sw.auto{width:auto;border-radius:999px;padding:0 12px;background:var(--paper);font-weight:800;font-size:.85rem}
+input[type=color]{padding:0;width:44px;height:34px;border:3px solid var(--edge);border-radius:10px;background:none;cursor:pointer}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px;flex-wrap:wrap}
+.ghost{background:transparent;border:3px solid var(--edge);border-radius:14px;padding:10px 18px;font-weight:800}
+
+@media (max-width:560px){ form.add-form{grid-template-columns:1fr} .primary{padding:14px} }
+
+@keyframes pop{
+  from{opacity:0;transform:translateY(18px) rotate(calc(var(--r) * 3)) scale(.94)}
+  to{opacity:1}
+}
+html[data-motion="on"] .intro .item{animation:pop .5s cubic-bezier(.2,.9,.3,1.2) both;animation-delay:calc(var(--i) * 70ms)}
+
+
+/* ===== Premium interaction ===== */
+:root{--spring:cubic-bezier(.34,1.56,.64,1)}
+[hidden]{display:none!important}
+.pill,.primary,.ghost,.sw,.del,.toastbtn{transition:transform .4s var(--spring),box-shadow .3s var(--spring),background-color .2s,color .2s;-webkit-tap-highlight-color:transparent}
+@media (hover:hover){
+  .pill:hover{transform:translate(-1px,-2px);box-shadow:4px 5px 0 var(--shadow)}
+  .primary:hover,.ghost:hover{transform:translateY(-2px)}
+  .sw:hover{transform:scale(1.12)}
+  .del:hover{transform:scale(1.12) rotate(8deg)}
+}
+.pill:active{transform:translate(3px,3px) scale(.95);box-shadow:0 0 0 var(--shadow);transition-duration:.07s}
+.primary:active,.ghost:active,.toastbtn:active{transform:scale(.93);transition-duration:.07s}
+.sw:active{transform:scale(.88);transition-duration:.07s}
+.del:active{transform:scale(.86);transition-duration:.07s}
+.card{transition:transform .5s var(--spring),box-shadow .35s var(--spring)}
+.card:active{transform:rotate(0deg) translate(4px,4px) scale(.965);box-shadow:1px 1px 0 var(--shadow);transition-duration:.08s}
+#sortBtn[aria-pressed="true"]{background:#12a37f;color:#fff}
+#q{flex:1 1 100%;background:var(--paper);border-width:3px;border-radius:999px;padding:11px 18px;box-shadow:3px 3px 0 var(--shadow);transition:box-shadow .3s var(--spring),transform .3s var(--spring)}
+#q:focus{transform:translateY(-1px);box-shadow:5px 5px 0 var(--shadow)}
+.mode-sort .item{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.mode-sort .card{outline:3px dotted var(--edge);outline-offset:5px;pointer-events:none}
+.item.dragging{z-index:6;cursor:grabbing}
+.item.dragging .card{box-shadow:12px 12px 0 var(--shadow)}
+.item.leaving{pointer-events:none}
+#toasts{position:fixed;left:0;right:0;bottom:max(16px,env(safe-area-inset-bottom));display:grid;justify-items:center;gap:10px;padding:0 16px;pointer-events:none;z-index:50}
+.toast{pointer-events:auto;display:flex;align-items:center;gap:14px;background:var(--paper);color:var(--ink);border:3px solid var(--edge);border-radius:16px;padding:10px 14px;font-weight:700;box-shadow:4px 4px 0 var(--shadow)}
+.toastbtn{background:var(--ink);color:var(--bg);border:0;border-radius:10px;padding:6px 12px;font-weight:800}
+.switchrow{display:flex;justify-content:space-between;align-items:center;font-weight:800}
+input[type=checkbox]{width:24px;height:24px;accent-color:#7a5cff}
+input[type=range]{width:100%;accent-color:#7a5cff}
+kbd{border:2px solid var(--edge);border-radius:6px;padding:1px 7px;font:inherit;font-weight:800;font-size:.85rem;background:var(--bg)}
+.keys{list-style:none;padding:0;margin:4px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;font-weight:500;font-size:.9rem}
+@keyframes bump{40%{transform:scale(1.1)}}
+@keyframes out{to{opacity:0;transform:scale(.6) rotate(6deg)}}
+@keyframes dlgIn{from{opacity:0;transform:translateY(26px) scale(.94)}}
+@keyframes dlgOut{to{opacity:0;transform:translateY(14px) scale(.96)}}
+@keyframes fadeIn{from{opacity:0}}
+@keyframes fadeOut{to{opacity:0}}
+@keyframes toastIn{from{opacity:0;transform:translateY(24px) scale(.9)}}
+@keyframes toastOut{to{opacity:0;transform:translateY(12px) scale(.95)}}
+html[data-motion="on"] .bump{animation:bump .4s var(--spring)}
+html[data-motion="on"] .item.enter{animation:pop .55s var(--spring) both}
+html[data-motion="on"] .item.leaving{animation:out .24s cubic-bezier(.5,0,.9,.4) forwards}
+html[data-motion="on"] dialog[open]{animation:dlgIn .4s var(--spring)}
+html[data-motion="on"] dialog[open]::backdrop{animation:fadeIn .25s}
+html[data-motion="on"] dialog.closing{animation:dlgOut .18s ease-in forwards}
+html[data-motion="on"] dialog.closing::backdrop{animation:fadeOut .18s forwards}
+html[data-motion="on"] .toast{animation:toastIn .45s var(--spring)}
+html[data-motion="on"] .toast.out{animation:toastOut .22s ease-in forwards}
+
+html:not([data-motion="on"]) *{transition-duration:.01ms!important}
+/* ===== Roda pengaturan + tray yang keluar dari roda ===== */
+.tools{flex-wrap:nowrap;gap:0;align-items:center}
+.dock{display:contents}
+#q{flex:1 1 0;min-width:90px}
+.gear{width:54px;height:54px;padding:0;border-radius:50%;display:grid;place-items:center;flex:none;margin-right:12px}
+.gear svg{transition:transform .8s cubic-bezier(.34,1.35,.64,1)}
+#setBtn[aria-expanded="true"]{background:var(--ink);color:var(--bg)}
+#setBtn[aria-expanded="true"] svg{transform:rotate(180deg)}
+.panel{flex:none;width:0;min-width:0;overflow:hidden;transition:width .6s cubic-bezier(.22,1,.36,1),margin .6s cubic-bezier(.22,1,.36,1)}
+.panel.open{margin-right:12px}
+.panel-in{width:100%;overflow:hidden;scrollbar-width:none}
+.panel-in::-webkit-scrollbar{display:none}
+.panel.open .panel-in{overflow-x:auto}
+.prow{display:flex;gap:10px;width:max-content;padding:6px 10px 12px 4px}
+.prow .pill{flex:none;white-space:nowrap}
+.mini{padding:4px 12px;font-size:.85rem;margin-left:6px}
+@keyframes slideOut{from{opacity:0;transform:translateX(-70px) scale(.6) rotate(-12deg)}}
+html[data-motion="on"] .panel.open .pill{animation:slideOut .6s var(--spring) backwards;animation-delay:calc(var(--k,0) * 70ms + 80ms)}
+
+/* Cari: makin gepeng sampai habis */
+#q{
+  transform-origin:right center;
+  transition:min-width .9s cubic-bezier(.65,0,.35,1),padding .9s cubic-bezier(.65,0,.35,1),visibility .9s,box-shadow .3s,transform .6s cubic-bezier(.65,0,.35,1);
+}
+.panel:not(.open){transition:width .9s cubic-bezier(.65,0,.35,1),margin .9s cubic-bezier(.65,0,.35,1)}
+#q::placeholder{transition:opacity .25s}
+.tools.nosearch #q{
+  min-width:0;padding-left:0;padding-right:0;
+  transform:scaleX(0);visibility:hidden;pointer-events:none;
+  transition:min-width .6s cubic-bezier(.22,1,.36,1),padding .6s cubic-bezier(.22,1,.36,1),transform .35s cubic-bezier(.55,0,1,.45) .25s,visibility 0s linear .6s;
+}
+.tools.nosearch #q::placeholder{opacity:0;transition-duration:.15s}
+.tools.nosearch .panel.open{margin-right:0}
+html:not([data-motion="on"]) #q{transition-delay:0s!important}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1 id="hello"></h1>
+    <p class="date" id="date"></p>
+    <div class="tools">
+      <div class="dock">
+        <button class="pill gear" id="setBtn" type="button" aria-label="Buka pengaturan" aria-expanded="false" aria-controls="panel" data-sfx="toggle"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        <div class="panel" id="panel" aria-hidden="true" inert>
+          <div class="panel-in">
+            <div class="prow">
+              <button class="pill" id="textBtn" type="button">Ubah teks</button>
+              <button class="pill" id="editBtn" type="button" aria-pressed="false" data-sfx="toggle">Edit kartu</button>
+              <button class="pill" id="sortBtn" type="button" aria-pressed="false" data-sfx="toggle">Urutkan</button>
+              <button class="pill" id="delBtn" type="button" aria-pressed="false" data-sfx="toggle">Hapus kartu</button>
+              <button class="pill" id="soundBtn" type="button">Suara</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <input type="text" id="q" placeholder="Cari…" aria-label="Cari shortcut" autocomplete="off">
+    </div>
+  </header>
+  <p class="hint" id="hint" role="status"></p>
+
+  <section id="list" class="grid intro" aria-label="Daftar shortcut"></section>
+  <p class="empty" id="noRes" hidden>Tidak ada shortcut yang cocok.</p>
+
+  <form class="add-form" id="form" autocomplete="off">
+    <input type="text" id="n" placeholder="Nama, misalnya Instagram" maxlength="40" required aria-label="Nama">
+    <input type="text" id="u" placeholder="Link, misalnya instagram.com" required aria-label="Link">
+    <button class="primary" type="submit" data-sfx="none">Tambah kartu</button>
+  </form>
+  <p id="msg" role="status"></p>
+</main>
+
+<dialog id="gd">
+  <form id="gform" autocomplete="off">
+    <h2>Ubah teks sapaan</h2>
+    <div class="field">
+      <label for="gtext">Teks (nama, sapaan, atau apa saja)</label>
+      <input type="text" id="gtext" maxlength="40" placeholder="Misalnya: Halo, Kevin!">
+    </div>
+    <div class="actions">
+      <button class="ghost" type="button" id="gauto">Sapaan otomatis</button>
+      <button class="ghost" type="button" id="gcancel">Batal</button>
+      <button class="primary" type="submit" data-sfx="none">Simpan</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="ed">
+  <form id="eform" autocomplete="off">
+    <h2>Edit kartu</h2>
+    <div class="row2">
+      <div class="field">
+        <label for="edL">Huruf</label>
+        <input type="text" id="edL" maxlength="2" placeholder="Auto">
+      </div>
+      <div class="field">
+        <label for="edN">Nama</label>
+        <input type="text" id="edN" maxlength="40" required>
+      </div>
+    </div>
+    <div class="field">
+      <label for="edU">Link</label>
+      <input type="text" id="edU" required>
+    </div>
+    <div class="field">
+      <label id="colLabel">Warna</label>
+      <div class="swatches" id="sws" role="group" aria-labelledby="colLabel"></div>
+    </div>
+    <p id="edMsg" style="color:#ff3b5c;font-weight:700;min-height:1.4em;margin:0 0 6px"></p>
+    <div class="actions">
+      <button class="ghost" type="button" id="edCancel">Batal</button>
+      <button class="primary" type="submit" data-sfx="none">Simpan</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="sd">
+  <h2>Suara, animasi &amp; pintasan</h2>
+  <div class="field"><label class="switchrow" for="sOn"><span>Suara aktif</span><input type="checkbox" id="sOn"></label></div>
+  <div class="field"><label for="sVol">Volume</label><input type="range" id="sVol" min="0" max="100"></div>
+  <div class="field"><label class="switchrow" for="mForce"><span>Paksa animasi</span><input type="checkbox" id="mForce"></label>
+    <small style="color:var(--muted);font-weight:500">Nyalakan jika transisi tidak terlihat. Ini mengabaikan mode kurangi gerakan di perangkat.</small></div>
+  <ul class="keys">
+    <li><kbd>/</kbd> cari</li><li><kbd>N</kbd> tambah kartu</li>
+    <li><kbd>E</kbd> edit</li><li><kbd>D</kbd> hapus</li>
+    <li><kbd>S</kbd> urutkan</li><li><kbd>T</kbd> ubah teks</li>
+    <li><kbd>M</kbd> suara</li><li><kbd>1–9</kbd> buka kartu</li>
+    <li><kbd>Ctrl+Z</kbd> urungkan</li><li><kbd>Esc</kbd> keluar mode</li><li><kbd>P</kbd> pengaturan</li>
+  </ul>
+  <div class="actions"><button class="primary" type="button" id="sClose">Tutup</button></div>
+</dialog>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+const KEY = 'shortcut-kartu-v1';
+const GKEY = 'shortcut-sapaan-v1';
+const PRESETS = ['#ff4d42', '#ff9f1c', '#f6f05f', '#5be37d', '#4cc9f0', '#5865f2', '#b388ff', '#ff7eb6', '#151220'];
+const DEFAULTS = [
+  { n: 'X', u: 'https://x.com' },
+  { n: 'Discord', u: 'https://discord.com/app' },
+  { n: 'YouTube', u: 'https://www.youtube.com' }
+];
+
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) { const arr = JSON.parse(raw); if (Array.isArray(arr)) return arr; }
+  } catch (e) {}
+  return DEFAULTS.map(x => ({ ...x }));
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(items)); } catch (e) {} }
+function loadGreet() { try { return localStorage.getItem(GKEY) || ''; } catch (e) { return ''; } }
+function saveGreet() { try { localStorage.setItem(GKEY, greet); } catch (e) {} }
+
+function normalize(u) {
+  u = u.trim();
+  if (!u) return null;
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = 'https://' + u;
+  try {
+    const x = new URL(u);
+    if (x.protocol !== 'https:' && x.protocol !== 'http:') return null;
+    return x.href;
+  } catch (e) { return null; }
+}
+function hueOf(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 360; return h; }
+function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return u; } }
+function hslToHex(h, s, l) {
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  const x = v => Math.round(255 * v).toString(16).padStart(2, '0');
+  return '#' + x(f(0)) + x(f(8)) + x(f(4));
+}
+function fgFor(hex) {
+  const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+  return (0.299 * r + 0.587 * g + 0.114 * b) > 140 ? '#151220' : '#ffffff';
+}
+function baseLook(it) {
+  const h = hostOf(it.u);
+  if (h === 'x.com' || h === 'twitter.com') return { brand: 'x', bg: '#151220' };
+  if (h.endsWith('discord.com') || h === 'discord.gg') return { bg: '#5865f2', fg: '#ffffff' };
+  if (h.endsWith('youtube.com') || h === 'youtu.be') return { bg: '#ff4d42', fg: '#151220' };
+  return { bg: hslToHex(hueOf(it.n), 90, 68), fg: '#151220' };
+}
+function look(it) {
+  if (it.c) return { bg: it.c, fg: fgFor(it.c) };
+  return baseLook(it);
+}
+function letterOf(it) {
+  const l = (it.l || '').trim();
+  return (l || Array.from(it.n)[0] || '?').toUpperCase();
+}
+
+let items = load();
+let greet = loadGreet();
+let mode = null; // null | 'edit' | 'del'
+const list = document.getElementById('list');
+const msg = document.getElementById('msg');
+const hint = document.getElementById('hint');
+const editBtn = document.getElementById('editBtn');
+const delBtn = document.getElementById('delBtn');
+
+function render() {
+  list.textContent = '';
+  if (!items.length) {
+    const p = document.createElement('p');
+    p.className = 'empty';
+    p.textContent = 'Belum ada kartu. Tambahkan lewat form di bawah.';
+    list.appendChild(p);
+    return;
+  }
+  items.forEach((it, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'item';
+    wrap.style.setProperty('--i', i);
+    wrap._it = it;
+
+    const a = document.createElement('a');
+    a.className = 'card';
+    a.href = it.u;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    const lk = look(it);
+    if (lk.brand) a.dataset.brand = lk.brand;
+    else { a.style.background = lk.bg; a.style.color = lk.fg; }
+    a.draggable = false;
+    a.addEventListener('click', e => {
+      if (mode === 'edit') { e.preventDefault(); openEditor(it); }
+      else if (mode === 'sort') e.preventDefault();
+    });
+
+    const big = document.createElement('div');
+    big.className = 'big';
+    big.setAttribute('aria-hidden', 'true');
+    big.textContent = letterOf(it);
+
+    const info = document.createElement('div');
+    const name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = it.n;
+    const host = document.createElement('div');
+    host.className = 'host';
+    host.textContent = hostOf(it.u);
+    info.append(name, host);
+    a.append(big, info);
+
+    const del = document.createElement('button');
+    del.className = 'del';
+    del.type = 'button';
+    del.setAttribute('aria-label', 'Hapus ' + it.n);
+    del.textContent = '×';
+    del.dataset.sfx = 'none';
+    del.addEventListener('click', () => removeItem(it));
+
+    wrap.append(a, del);
+    list.appendChild(wrap);
+  });
+  applyFilter();
+}
+
+const sortBtn = document.getElementById('sortBtn');
+const MODES = {
+  edit: [editBtn, 'Edit kartu', 'Mode edit: tap kartu yang mau diubah.'],
+  del: [delBtn, 'Hapus kartu', 'Mode hapus: tap tanda × di kartu yang mau dihapus.'],
+  sort: [sortBtn, 'Urutkan', 'Mode urutkan: tahan dan geser kartu ke posisi baru.']
+};
+function setMode(m) {
+  mode = (mode === m) ? null : m;
+  for (const k in MODES) {
+    const [b, label] = MODES[k];
+    b.setAttribute('aria-pressed', String(mode === k));
+    b.textContent = mode === k ? 'Selesai' : label;
+    list.classList.toggle('mode-' + k, mode === k);
+  }
+  hint.textContent = '';
+  if (mode) {
+    const sp = document.createElement('span');
+    sp.textContent = MODES[mode][2];
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'pill mini'; b.textContent = 'Selesai'; b.dataset.sfx = 'toggle';
+    b.addEventListener('click', () => setMode(mode));
+    hint.append(sp, b);
+    setPanel(false);
+  }
+}
+editBtn.addEventListener('click', () => setMode('edit'));
+delBtn.addEventListener('click', () => setMode('del'));
+sortBtn.addEventListener('click', () => setMode('sort'));
+
+/* Tambah kartu */
+document.getElementById('form').addEventListener('submit', e => {
+  e.preventDefault();
+  const n = document.getElementById('n').value.trim();
+  const u = normalize(document.getElementById('u').value);
+  if (!n) { msg.textContent = 'Isi nama kartu.'; return; }
+  if (!u) { msg.textContent = 'Link tidak valid. Contoh: instagram.com'; return; }
+  msg.textContent = '';
+  items.push({ n, u });
+  save();
+  list.classList.remove('intro');
+  q.value = '';
+  render();
+  markEnter(items[items.length - 1]);
+  sfx('add');
+  toast('Kartu “' + n + '” ditambahkan.');
+  e.target.reset();
+});
+
+/* Sapaan */
+const gd = document.getElementById('gd');
+const gtext = document.getElementById('gtext');
+function autoGreet() {
+  const h = new Date().getHours();
+  const s = h < 11 ? 'pagi' : h < 15 ? 'siang' : h < 18 ? 'sore' : 'malam';
+  return 'Selamat ' + s + '.';
+}
+function applyGreet() {
+  document.getElementById('hello').textContent = greet || autoGreet();
+  document.getElementById('date').textContent =
+    new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' }) + '. Mau ke mana?';
+}
+document.getElementById('textBtn').addEventListener('click', () => {
+  gtext.value = greet;
+  gd.showModal();
+  gtext.focus();
+});
+document.getElementById('gcancel').addEventListener('click', () => closeDlg(gd));
+document.getElementById('gauto').addEventListener('click', () => {
+  greet = ''; saveGreet(); applyGreet(); closeDlg(gd);
+});
+document.getElementById('gform').addEventListener('submit', e => {
+  e.preventDefault();
+  greet = gtext.value.trim();
+  sfx('save'); toast('Teks sapaan disimpan.');
+  saveGreet(); applyGreet(); closeDlg(gd);
+});
+
+/* Editor kartu */
+const ed = document.getElementById('ed');
+const edL = document.getElementById('edL');
+const edN = document.getElementById('edN');
+const edU = document.getElementById('edU');
+const edMsg = document.getElementById('edMsg');
+const sws = document.getElementById('sws');
+let editIdx = -1, selColor = null, colorInput = null;
+
+function drawSwatches() {
+  sws.textContent = '';
+  const auto = document.createElement('button');
+  auto.type = 'button';
+  auto.className = 'sw auto';
+  auto.textContent = 'Otomatis';
+  auto.setAttribute('aria-pressed', String(selColor === null));
+  auto.addEventListener('click', () => { selColor = null; drawSwatches(); });
+  sws.appendChild(auto);
+
+  PRESETS.forEach(c => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'sw';
+    b.style.background = c;
+    b.setAttribute('aria-label', 'Warna ' + c);
+    b.setAttribute('aria-pressed', String(selColor === c));
+    b.addEventListener('click', () => { selColor = c; drawSwatches(); });
+    sws.appendChild(b);
+  });
+
+  colorInput = document.createElement('input');
+  colorInput.type = 'color';
+  colorInput.setAttribute('aria-label', 'Pilih warna sendiri');
+  colorInput.value = selColor || baseLook(items[editIdx]).bg;
+  colorInput.addEventListener('input', () => { selColor = colorInput.value; });
+  colorInput.addEventListener('change', () => drawSwatches());
+  sws.appendChild(colorInput);
+}
+
+function openEditor(it) {
+  editIdx = items.indexOf(it);
+  edL.value = it.l || '';
+  edN.value = it.n;
+  edU.value = it.u;
+  selColor = it.c || null;
+  edMsg.textContent = '';
+  drawSwatches();
+  ed.showModal();
+  edN.focus();
+}
+document.getElementById('edCancel').addEventListener('click', () => closeDlg(ed));
+document.getElementById('eform').addEventListener('submit', e => {
+  e.preventDefault();
+  const n = edN.value.trim();
+  const u = normalize(edU.value);
+  if (!n) { edMsg.textContent = 'Isi nama kartu.'; return; }
+  if (!u) { edMsg.textContent = 'Link tidak valid. Contoh: instagram.com'; return; }
+  const it = items[editIdx];
+  it.n = n;
+  it.u = u;
+  const l = edL.value.trim();
+  if (l) it.l = l; else delete it.l;
+  if (selColor) it.c = selColor; else delete it.c;
+  sfx('save'); toast('Perubahan disimpan.');
+  save();
+  list.classList.remove('intro');
+  render();
+  closeDlg(ed);
+});
+
+/* ===== Interaksi premium: suara, toast, dialog, urut, cari, pintasan ===== */
+const MKEY = 'shortcut-gerak-v1';
+let force = false;
+try { force = localStorage.getItem(MKEY) === '1'; } catch (e) {}
+const mq = matchMedia('(prefers-reduced-motion: reduce)');
+function applyMotion() { document.documentElement.dataset.motion = (force || !mq.matches) ? 'on' : 'off'; }
+if (mq.addEventListener) mq.addEventListener('change', applyMotion);
+const reduce = () => document.documentElement.dataset.motion !== 'on';
+const SPRING = 'cubic-bezier(.34,1.56,.64,1)';
+const SKEY = 'shortcut-suara-v1';
+let snd = { on: true, vol: 0.6 };
+try {
+  const sv = JSON.parse(localStorage.getItem(SKEY));
+  if (sv) snd = { on: sv.on !== false, vol: typeof sv.vol === 'number' ? Math.min(1, Math.max(0, sv.vol)) : 0.6 };
+} catch (e) {}
+function saveSnd() { try { localStorage.setItem(SKEY, JSON.stringify(snd)); } catch (e) {} }
+
+let ac = null, userActive = false;
+['pointerdown', 'keydown'].forEach(t => addEventListener(t, () => { userActive = true; }, { capture: true, once: true }));
+function actx() {
+  if (!ac) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; ac = new C(); }
+  if (ac.state === 'suspended') ac.resume();
+  return ac;
+}
+function tone(f, at, d, type, g, to) {
+  const a = actx(); if (!a) return;
+  const t0 = a.currentTime + at, o = a.createOscillator(), v = a.createGain();
+  o.type = type || 'sine';
+  o.frequency.setValueAtTime(f, t0);
+  if (to) o.frequency.exponentialRampToValueAtTime(to, t0 + d);
+  v.gain.setValueAtTime(0.0001, t0);
+  v.gain.exponentialRampToValueAtTime(Math.max(0.0002, 0.2 * (g || 1) * snd.vol), t0 + 0.012);
+  v.gain.exponentialRampToValueAtTime(0.0001, t0 + d);
+  o.connect(v); v.connect(a.destination);
+  o.start(t0); o.stop(t0 + d + 0.03);
+}
+const SFX = {
+  click: () => tone(620, 0, 0.06, 'sine', 0.8, 500),
+  toggle: () => { tone(440, 0, 0.07); tone(660, 0.07, 0.1); },
+  add: () => { tone(523, 0, 0.08); tone(784, 0.08, 0.13); },
+  del: () => tone(420, 0, 0.15, 'triangle', 0.9, 230),
+  save: () => { tone(659, 0, 0.07); tone(880, 0.07, 0.07); tone(1175, 0.14, 0.13); },
+  note: () => tone(880, 0, 0.17, 'sine', 0.6)
+};
+function sfx(n) { if (snd.on && snd.vol > 0 && userActive) (SFX[n] || SFX.click)(); }
+
+const q = document.getElementById('q');
+const noRes = document.getElementById('noRes');
+const soundBtn = document.getElementById('soundBtn');
+const sd = document.getElementById('sd');
+const sOn = document.getElementById('sOn');
+const sVol = document.getElementById('sVol');
+function paintSound() {
+  soundBtn.textContent = snd.on ? 'Suara' : 'Suara mati';
+  sOn.checked = snd.on;
+  sVol.value = Math.round(snd.vol * 100);
+}
+soundBtn.addEventListener('click', () => sd.showModal());
+document.getElementById('sClose').addEventListener('click', () => closeDlg(sd));
+sOn.addEventListener('change', () => { snd.on = sOn.checked; saveSnd(); paintSound(); if (snd.on) sfx('toggle'); });
+sVol.addEventListener('input', () => { snd.vol = sVol.value / 100; saveSnd(); });
+sVol.addEventListener('change', () => sfx('click'));
+const mForce = document.getElementById('mForce');
+mForce.checked = force;
+mForce.addEventListener('change', () => {
+  force = mForce.checked;
+  try { localStorage.setItem(MKEY, force ? '1' : '0'); } catch (e) {}
+  applyMotion();
+});
+
+/* Klik: efek bump + suara */
+document.addEventListener('click', e => {
+  const b = e.target.closest('button, a.card'); if (!b) return;
+  if (b.matches('.pill,.primary,.ghost,.sw')) { b.classList.add('bump'); setTimeout(() => b.classList.remove('bump'), 420); }
+  if (b.dataset.sfx !== 'none') sfx(b.dataset.sfx || 'click');
+});
+
+/* Dialog halus */
+function closeDlg(d) {
+  if (!d.open || d.classList.contains('closing')) return;
+  if (reduce()) { d.close(); return; }
+  d.classList.add('closing');
+  setTimeout(() => { d.classList.remove('closing'); d.close(); }, 180);
+}
+[gd, ed, sd].forEach(d => {
+  d.addEventListener('cancel', e => { e.preventDefault(); closeDlg(d); });
+  d.addEventListener('click', e => {
+    if (e.target !== d) return;
+    const r = d.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) closeDlg(d);
+  });
+});
+
+/* Toast */
+const toasts = document.getElementById('toasts');
+function toast(text, o) {
+  o = o || {};
+  while (toasts.children.length >= 3) toasts.firstChild.remove();
+  const t = document.createElement('div');
+  t.className = 'toast';
+  const sp = document.createElement('span');
+  sp.textContent = text;
+  t.appendChild(sp);
+  const off = () => {
+    if (!t.isConnected) return;
+    if (reduce()) t.remove();
+    else { t.classList.add('out'); setTimeout(() => t.remove(), 230); }
+  };
+  if (o.act) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'toastbtn'; b.textContent = o.act; b.dataset.sfx = 'none';
+    b.addEventListener('click', () => { o.fn(); off(); });
+    t.appendChild(b);
+  }
+  toasts.appendChild(t);
+  if (o.snd) sfx('note');
+  setTimeout(off, o.ms || 3200);
+}
+
+/* Hapus + urungkan */
+const trash = [];
+function elOf(it) { return [...list.children].find(n => n._it === it); }
+function markEnter(it) {
+  const el = elOf(it);
+  if (el && !reduce()) { el.classList.add('enter'); setTimeout(() => el.classList.remove('enter'), 700); }
+}
+function removeItem(it) {
+  const el = elOf(it);
+  if (!el || el.classList.contains('leaving')) return;
+  const go = () => {
+    const idx = items.indexOf(it);
+    if (idx < 0) return;
+    items.splice(idx, 1);
+    trash.push({ it, idx });
+    if (trash.length > 10) trash.shift();
+    save(); render();
+  };
+  sfx('del');
+  if (reduce()) go(); else { el.classList.add('leaving'); setTimeout(go, 240); }
+  toast('Kartu “' + it.n + '” dihapus.', { act: 'Urungkan', fn: () => undoOne(it), ms: 5500 });
+}
+function undoOne(it) {
+  const k = trash.findIndex(t => t.it === it);
+  if (k < 0) return;
+  const idx = trash.splice(k, 1)[0].idx;
+  items.splice(Math.min(idx, items.length), 0, it);
+  save(); render(); markEnter(it); sfx('toggle');
+}
+function undo() {
+  const t = trash[trash.length - 1];
+  if (t) undoOne(t.it); else toast('Tidak ada yang bisa diurungkan.', { snd: 1 });
+}
+
+/* Cari */
+function openLink(h) { window.open(h, '_blank', 'noopener,noreferrer'); }
+function applyFilter() {
+  const k = q.value.trim().toLowerCase();
+  let n = 0;
+  list.querySelectorAll('.item').forEach(el => {
+    const it = el._it;
+    const hit = !k || (it.n + ' ' + hostOf(it.u) + ' ' + it.u).toLowerCase().includes(k);
+    el.hidden = !hit;
+    if (hit) n++;
+  });
+  noRes.hidden = !(items.length && !n);
+}
+q.addEventListener('input', applyFilter);
+q.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const a = list.querySelector('.item:not([hidden]) a');
+  if (a) { e.preventDefault(); openLink(a.href); }
+});
+
+/* Urutkan: seret kartu (pointer events, jalan di HP dan desktop) */
+let drag = null;
+function place() {
+  if (drag) drag.el.style.transform = 'translate(' + (drag.lx - drag.sx + drag.ax) + 'px,' + (drag.ly - drag.sy + drag.ay) + 'px) scale(1.06)';
+}
+list.addEventListener('pointerdown', e => {
+  if (mode !== 'sort' || drag || (e.pointerType === 'mouse' && e.button !== 0)) return;
+  const el = e.target.closest('.item');
+  if (!el) return;
+  e.preventDefault();
+  el.setPointerCapture(e.pointerId);
+  drag = { el, id: e.pointerId, sx: e.clientX, sy: e.clientY, lx: e.clientX, ly: e.clientY, ax: 0, ay: 0, swapped: false };
+  el.classList.add('dragging');
+});
+list.addEventListener('pointermove', e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  drag.lx = e.clientX; drag.ly = e.clientY; place();
+  const el = drag.el;
+  const over = document.elementsFromPoint(e.clientX, e.clientY).map(n => n.closest('.item')).find(n => n && n !== el && !n.hidden);
+  if (!over) return;
+  const vis = [...list.querySelectorAll('.item:not([hidden])')];
+  const pos = new Map(vis.map(k => [k, [k.offsetLeft, k.offsetTop]]));
+  const all = [...list.children];
+  list.insertBefore(el, all.indexOf(el) < all.indexOf(over) ? over.nextSibling : over);
+  drag.swapped = true;
+  vis.forEach(k => {
+    const p = pos.get(k), dx = p[0] - k.offsetLeft, dy = p[1] - k.offsetTop;
+    if (!dx && !dy) return;
+    if (k === el) { drag.ax += dx; drag.ay += dy; }
+    else if (!reduce()) k.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: 260, easing: SPRING });
+  });
+  place();
+});
+function endDrag(e) {
+  if (!drag || e.pointerId !== drag.id) return;
+  const el = drag.el, cur = el.style.transform, swapped = drag.swapped;
+  el.classList.remove('dragging');
+  el.style.transform = '';
+  if (!reduce() && cur) el.animate([{ transform: cur }, { transform: 'none' }], { duration: 340, easing: SPRING });
+  drag = null;
+  if (swapped) { items = [...list.querySelectorAll('.item')].map(n => n._it); save(); sfx('toggle'); }
+}
+list.addEventListener('pointerup', endDrag);
+list.addEventListener('pointercancel', endDrag);
+
+/* Pintasan keyboard */
+const km = m => { setMode(m); sfx('toggle'); };
+document.addEventListener('keydown', e => {
+  const t = e.target, typing = t.matches && t.matches('input,textarea,select');
+  const dlg = document.querySelector('dialog[open]');
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !typing && !dlg) { e.preventDefault(); undo(); return; }
+  if (e.key === 'Escape' && !dlg) {
+    if (t === q && q.value) { q.value = ''; applyFilter(); return; }
+    if (typing) t.blur();
+    if (mode) setMode(mode); else if (panel.classList.contains('open')) setPanel(false);
+    return;
+  }
+  if (typing || dlg || e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === '/') { e.preventDefault(); if (panel.classList.contains('open')) setPanel(false); q.focus(); }
+  else if (k === 'n') { e.preventDefault(); document.getElementById('n').focus(); }
+  else if (k === 'e') km('edit');
+  else if (k === 'd') km('del');
+  else if (k === 's') km('sort');
+  else if (k === 'p') { setPanel(!panel.classList.contains('open')); sfx('toggle'); }
+  else if (k === 't') document.getElementById('textBtn').click();
+  else if (k === '?') soundBtn.click();
+  else if (k === 'm') { snd.on = !snd.on; saveSnd(); paintSound(); if (snd.on) sfx('toggle'); toast(snd.on ? 'Suara aktif.' : 'Suara mati.'); }
+  else if (/^[1-9]$/.test(k)) {
+    const a = [...list.querySelectorAll('.item:not([hidden]) a')][+k - 1];
+    if (a) openLink(a.href);
+  }
+});
+
+const setBtn = document.getElementById('setBtn');
+const panel = document.getElementById('panel');
+panel.querySelectorAll('.pill').forEach((b, i) => b.style.setProperty('--k', i));
+function sizePanel() {
+  const tools = document.querySelector('.tools');
+  const full = panel.querySelector('.prow').scrollWidth;
+  const base = tools.clientWidth - setBtn.offsetWidth - 12;
+  const fits = full <= base - 12 - 90;
+  tools.classList.toggle('nosearch', !fits);
+  panel.style.width = Math.max(0, Math.min(full, fits ? full : base)) + 'px';
+}
+addEventListener('resize', () => { if (panel.classList.contains('open')) sizePanel(); });
+function setPanel(on) {
+  panel.classList.toggle('open', on);
+  panel.inert = !on;
+  panel.setAttribute('aria-hidden', String(!on));
+  setBtn.setAttribute('aria-expanded', String(on));
+  setBtn.setAttribute('aria-label', on ? 'Tutup pengaturan' : 'Buka pengaturan');
+  if (on) sizePanel();
+  else { panel.style.width = '0px'; document.querySelector('.tools').classList.remove('nosearch'); }
+}
+setBtn.addEventListener('click', () => setPanel(!panel.classList.contains('open')));
+
+applyMotion();
+applyGreet();
+paintSound();
+setPanel(false);
+render();
+setTimeout(() => list.classList.remove('intro'), 1500);
+</script>
+</body>
+</html>
