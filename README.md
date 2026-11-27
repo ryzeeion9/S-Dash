@@ -16,9 +16,6 @@ Halaman shortcut pribadi untuk membuka situs favorit lewat kartu warna-warni. Cu
 - Responsif
 - Data tersimpan di browser (`localStorage`)
 
-## Cara Pakai
-Buka `index.html` di browser.
-
 ## Pintasan Keyboard
 | Tombol | Fungsi |
 |---|---|
